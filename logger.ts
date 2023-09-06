@@ -1,82 +1,92 @@
-class CustomLogger {
+namespace GasLogger {
 
-  loggers: BaseLogger[]
+  class GasLogger {
 
-  constructor() {
-    this.loggers = [];
-  }
+    loggers: BaseAppender[]
 
-  add_logger(logger: BaseLogger) {
-    this.loggers.push(logger);
-  }
+    constructor() {
+      this.loggers = [];
+    }
 
-  write_log(message: string, level = 'info') {
-    const date_now = new Date();
-    const date_message = Utilities.formatDate(date_now, 'Asia/Tokyo', "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    const final_message = date_message + ',' + level + ',' + message + "\n"
+    add_logger(logger: BaseAppender) {
+      this.loggers.push(logger);
+    }
 
-    for(let logger of this.loggers) {
-      logger.write_log(final_message);
+    write_log(message: string, level = 'info') {
+      const date_now = new Date();
+      const date_message = Utilities.formatDate(date_now, 'Asia/Tokyo', "yyyy-MM-dd'T'HH:mm:ss'Z'")
+      const final_message = date_message + ',' + level + ',' + message + "\n"
+
+      for(let logger of this.loggers) {
+        logger.write_log(final_message);
+      }
+    }
+
+    debug(message: string): void {
+      this.write_log(message, 'debug');
+    }
+
+    info(message: string): void {
+      this.write_log(message, 'info');
+    }
+
+    warn(message: string): void {
+      this.write_log(message, 'warn');
+    }
+
+    error(message: string): void {
+      this.write_log(message, 'error');
+    }
+
+    fatal(message: string): void {
+      this.write_log(message, 'fatal');
     }
   }
 
-  debug(message: string): void {
-    this.write_log(message, 'debug');
+  class BaseAppender {
+    write_log(message: string): void {
+      // ベースクラスのためなにもしない
+    }
   }
 
-  info(message: string): void {
-    this.write_log(message, 'info');
+  class FileAppender extends BaseAppender {
+
+    logger_file_name: string
+    file: GoogleAppsScript.Document.Text
+
+    constructor(save_path: string, file_name: string) {
+      super();
+      const date_now = new Date();
+      this.logger_file_name = file_name + Utilities.formatDate(date_now, 'Asia/Tokyo', 'yyyyMM') + ".txt";
+      FolderUtils.get_or_create_dir(save_path);
+      const file = FileUtils.get_or_create_file(save_path + "/" + this.logger_file_name, DocumentApp) as GoogleAppsScript.Document.Document;
+      this.file = file.getBody().editAsText();
+    }
+
+    write_log(message: string) {
+      this.file.appendText(message);
+    }
   }
 
-  warn(message: string): void {
-    this.write_log(message, 'warn');
+  class ConsoleAppender extends BaseAppender {
+    write_log(message: string) {
+      console.log(message);
+    }
   }
 
-  error(message: string): void {
-    this.write_log(message, 'error');
+  const loggers: any = {
+    FileAppender,
+    ConsoleAppender
   }
 
-  fatal(message: string): void {
-    this.write_log(message, 'fatal');
-  }
-}
-
-class BaseLogger {
-  write_log(message: string): void {
-    // ベースクラスのためなにもしない
-  }
-}
-
-class FileLogger extends BaseLogger {
-
-  logger_file_name: string
-  file: GoogleAppsScript.Document.Text
-
-  constructor(save_path: string, file_name: string) {
-    super();
-    const date_now = new Date();
-    this.logger_file_name = file_name + Utilities.formatDate(date_now, 'Asia/Tokyo', 'yyyyMM') + ".txt";
-    FolderUtils.get_or_create_dir(save_path);
-    const file = FileUtils.get_or_create_file(save_path + "/" + this.logger_file_name, DocumentApp) as GoogleAppsScript.Document.Document;
-    this.file = file.getBody().editAsText();
+  export function create_appender(class_name: string, ...args: any[]): BaseAppender{
+     if (loggers[class_name] === undefined || loggers[class_name] === null) {
+      throw new Error(`Class type of \'${class_name}\' is not in the store`);
+    }
+    return new loggers[class_name](...args);
   }
 
-  write_log(message: string) {
-    this.file.appendText(message);
+  export function get_logger(): GasLogger{
+    return new GasLogger();
   }
-}
-
-class ConsoleLogger extends BaseLogger {
-  write_log(message: string) {
-    console.log(message);
-  }
-}
-
-function custom_logger_test(){
-  const logger = new CustomLogger();
-  logger.add_logger(new FileLogger("logging_test", "test"));
-  logger.add_logger(new ConsoleLogger());
-
-  logger.write_log("new log");
-  logger.write_log("new_log2");
 }
