@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@types/google-apps-script": "^1.0.67",
+    "drivefileutils": "github:KentaTsujii/DriveFileUtils",
     "typescript": "^5.2.2"
   }
 }
