@@ -1,5 +1,6 @@
 import { babel } from "@rollup/plugin-babel";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import commonjs from '@rollup/plugin-commonjs';
 
 const extensions = [".ts", ".js"];
 
@@ -17,9 +18,9 @@ const preventThreeShakingPlugin = () => {
   }
 
 export default {
-  input: "./test/index.ts",
+  input: "./test/gas_index.ts",
   output: {
-    dir: "gas",
+    dir: "gas_logger",
     format: "esm",
   },
   plugins: [
@@ -29,5 +30,6 @@ export default {
       mainFields: ["jsnext:main", "module", "main"]
     }),
     babel({ extensions, babelHelpers: "runtime" }),
+    commonjs(),
   ],
 };
