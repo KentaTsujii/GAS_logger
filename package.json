@@ -16,7 +16,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "push": "npm run build && clasp -P ./gas_logger push",
     "push_test": "tsc && rollup -c ./rollup_for_test.config.mjs && clasp -P ./gas_logger push",
-    "open": "clasp -P ./GasFileUtils open"
+    "open": "clasp -P ./gas_logger open"
   },
   "repository": {
     "type": "git",
