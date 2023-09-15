@@ -5,8 +5,8 @@
   "name": "gas_logger",
   "description": "google apps script 向けロガーライブラリ",
   "version": "1.0.0",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
   "directories": {
     "test": "test"
   },
